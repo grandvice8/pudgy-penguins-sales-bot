@@ -1,13 +1,13 @@
-const twit = require("twit");
+import twit from "twit";
 
 const T = new twit({
-  consumer_key: process.env.TWITTER_API_KEY,
-  consumer_secret: process.env.TWITTER_API_SECRET,
+  consumer_key: process.env.TWITTER_API_KEY || '',
+  consumer_secret: process.env.TWITTER_API_SECRET || '',
   access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-function postTweet(penguinId, ethPrice) {
+export function postTweet(penguinId: string, ethPrice: string): Promise<any> {
   return new Promise((resolve, reject) => {
     T.post(
       "statuses/update",
@@ -16,7 +16,7 @@ function postTweet(penguinId, ethPrice) {
           Date.now()
         ).toUTCString()}`,
       },
-      (error, data) => {
+      (error: any, data: any) => {
         if (error) {
           return reject(error);
         }
@@ -25,5 +25,3 @@ function postTweet(penguinId, ethPrice) {
     );
   });
 }
-
-module.exports = { postTweet };
