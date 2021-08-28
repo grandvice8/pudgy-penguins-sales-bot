@@ -13,12 +13,14 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "moment": "^2.29.1",
     "opensea-js": "^1.1.13",
     "twit": "^2.2.11",
     "typescript": "^4.4.2",
     "web3": "^1.5.2"
   },
   "devDependencies": {
-    "@types/twit": "^2.2.30"
+    "@types/twit": "^2.2.30",
+    "nodemon": "^2.0.12"
   }
 }

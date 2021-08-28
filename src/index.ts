@@ -1,24 +1,41 @@
+import moment from "moment";
+import fs from "fs";
+import path from "path";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 import { getSales } from "./opensea/opensea";
 import { postTweet } from "./twitter-bot/twitter";
+import { Penguin } from "./models/penguin";
+
+const fromTime = moment().unix();
+const paramsPath = path.join(__dirname, "../src/opensea/params.json");
+
+function writeParams(data: any) {
+  fs.writeFileSync(paramsPath, JSON.stringify(data));
+}
+
+function readParams() {
+  const data = fs.readFileSync(paramsPath);
+  return JSON.parse(data.toString());
+}
 
 async function main() {
   try {
-    await getSales().then((response: any) => {
-      response.asset_events.forEach((penguin: any) => {
-        console.log(penguin.asset.token_id);
+    const params = readParams() || fromTime;
+    await getSales(params.fromTime).then((completedSales: any) => {
+      completedSales.reverse().forEach(async (sale: Penguin, i: number) => {
+        const newMoment = moment.utc(sale.timestamp).unix();
+        await postTweet(sale).catch(() => console.log("Error tweeting"));
+        if (i === completedSales.length - 1) {
+          params.fromTime = newMoment + 1;
+          writeParams(params);
+        }
       });
     });
-    // Post tweet after making async call to get penguin sales. Example below
-    // await postTweet("1234", "3.2").then(() => {
-    //   console.log("Tweet succeeded");
-    // });
   } catch (e) {
-    console.log(`Tweet failed ${e}`);
+    console.log(`Failed to load penguins`);
   }
 }
 
-// setInterval(main, 10000);
-main();
+setInterval(main, 10000);
