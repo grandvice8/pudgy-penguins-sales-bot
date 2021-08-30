@@ -1,4 +1,4 @@
-import { EventType, Network, OpenSeaPort } from "opensea-js";
+import { Network, OpenSeaPort } from "opensea-js";
 import Web3 from "web3";
 
 import { Penguin } from "../models/penguin";
