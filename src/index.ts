@@ -3,11 +3,12 @@ import Web3 from 'web3';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { getSales } from './opensea/opensea';
+// import { getSales } from './opensea/opensea';
 import { postTweet } from './twitter-bot/twitter';
 import { Penguin } from './models/penguin';
 import { request } from './utilities/request';
 import { ethers } from 'ethers';
+import { formatEther } from 'ethers/lib/utils';
 
 const ETHERSCAN_ABI_URL = process.env.ETHERSCAN_ENDPOINT || '';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '';
@@ -15,29 +16,28 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || '';
 
 let fromTime = moment().unix();
 
-async function main() {
-  try {
-    await getSales(fromTime).then((completedSales: any) => {
-      completedSales.reverse().forEach(async (sale: Penguin, i: number) => {
-        const newMoment = moment.utc(sale.timestamp).unix();
-        console.log(sale);
-        await postTweet(sale).catch(() => console.log('Error tweeting'));
-        if (i === completedSales.length - 1) {
-          fromTime = newMoment + 1;
-        }
-      });
-    });
-  } catch (e) {
-    console.log(`Failed to load penguins`);
-  }
-}
+// async function main() {
+//   try {
+//     await getSales(fromTime).then((completedSales: any) => {
+//       completedSales.reverse().forEach(async (sale: Penguin, i: number) => {
+//         const newMoment = moment.utc(sale.timestamp).unix();
+//         console.log(sale);
+//         await postTweet(sale).catch(() => console.log('Error tweeting'));
+//         if (i === completedSales.length - 1) {
+//           fromTime = newMoment + 1;
+//         }
+//       });
+//     });
+//   } catch (e) {
+//     console.log(`Failed to load penguins`);
+//   }
+// }
 
 // setInterval(main, 10000);
 async function getContractAbi() {
   const abi = await request(
-    `${ETHERSCAN_ABI_URL}${CONTRACT_ADDRESS}&apiKey=${ETHERSCAN_API_KEY}`
+    `${ETHERSCAN_ABI_URL}${CONTRACT_ADDRESS}`
   );
-  // console.log(JSON.parse(abi).result);
   return JSON.parse(JSON.parse(abi).result);
 }
 
@@ -47,9 +47,15 @@ async function mainNew() {
   const provider = new ethers.providers.WebSocketProvider('wss://mainnet.infura.io/ws/v3/6b4db4e825064a46a1d48a5237a97259');
   const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
 
-  contract.on("Transfer", (event) => {
-    console.log(event);
-  });
+  contract.on("Transfer", (from, to, amount, value, event) => {
+    console.log('New Sale');
+    console.log(`${ from.substring(0, 8) } sent ${ value } for ${ formatEther(amount) } to ${ to.substring(0, 8) }`);
+    console.log(amount);
+    console.log(JSON.stringify(value));
+    // The event object contains the verbatim log data, the
+    // EventFragment and functions to fetch the block,
+    // transaction and receipt and event functions
+});
 
   // let web3 = new Web3(
   //   new Web3.providers.WebsocketProvider(
