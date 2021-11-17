@@ -16,7 +16,7 @@ export function postTweet(penguin: Penguin): Promise<any> {
       {
         status: `Penguin ${penguin.id} bought for ${penguin.price.price}${
           penguin.price.token
-        } ($${(+penguin.price.price * +penguin.price.usdPrice).toFixed(2)} USD) by ${
+        } by ${
           penguin.toAddresss.substring(0, 8)
         } from ${penguin.fromAddress.substring(0,8)} ${penguin.url}`,
       },
