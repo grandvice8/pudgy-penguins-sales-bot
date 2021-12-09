@@ -13,16 +13,12 @@ const T = new twit({
 
 export function postTweet(penguin: Penguin): Promise<any> {
   return new Promise((resolve, reject) => {
-    const price =
-      penguin.price.price > 0
-        ? `for ${penguin.price.price}${penguin.price.token} `
-        : '';
     T.post(
       'statuses/update',
       {
         status: `Penguin ${
           penguin.id
-        } bought ${price}by ${penguin.toAddresss.substring(
+        } bought for ${penguin.price.price}${penguin.price.token} by ${penguin.toAddresss.substring(
           0,
           8
         )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`,
@@ -34,5 +30,13 @@ export function postTweet(penguin: Penguin): Promise<any> {
         return resolve(data);
       }
     );
+    // log
+    console.log(`Penguin ${
+      penguin.id
+    } bought for ${penguin.price.price}${penguin.price.token} by ${penguin.toAddresss.substring(
+      0,
+      8
+    )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`);
+    
   });
 }
