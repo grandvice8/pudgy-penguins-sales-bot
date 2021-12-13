@@ -56,7 +56,16 @@ function tweetSale(event: any, price: number, tokenSymbol: string) {
 
 export async function subscribeToSales() {
   const abi = await getContractAbi();
-  const web3 = new Web3(new Web3.providers.WebsocketProvider(WSS_PROVIDER));
+  const options = {
+    // Enable auto reconnection
+    reconnect: {
+        auto: true,
+        delay: 5000, // ms
+        maxAttempts: 5,
+        onTimeout: false
+    }
+  };
+  const web3 = new Web3(new Web3.providers.WebsocketProvider(WSS_PROVIDER, options));
   const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);  
   contract.events
     .Transfer({})
