@@ -1,0 +1,1 @@
+worker: tsc -p . && node ./dist/index.js
