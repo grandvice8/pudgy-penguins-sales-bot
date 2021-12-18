@@ -1,1 +1,1 @@
-worker: npm i --save-dev @types/twit && tsc -p . && node ./dist/index.js
+worker: tsc -p . && node ./dist/index.js
