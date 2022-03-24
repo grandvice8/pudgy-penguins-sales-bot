@@ -1,10 +1,12 @@
-import twit from "twit";
+import twit from 'twit';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-import { Penguin } from "../models/penguin";
+import { Penguin } from '../models/penguin';
 
 const T = new twit({
-  consumer_key: process.env.TWITTER_API_KEY || "",
-  consumer_secret: process.env.TWITTER_API_SECRET || "",
+  consumer_key: process.env.TWITTER_API_KEY || '',
+  consumer_secret: process.env.TWITTER_API_SECRET || '',
   access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
@@ -12,13 +14,14 @@ const T = new twit({
 export function postTweet(penguin: Penguin): Promise<any> {
   return new Promise((resolve, reject) => {
     T.post(
-      "statuses/update",
+      'statuses/update',
       {
         status: `Penguin ${penguin.id} bought for ${penguin.price.price}${
           penguin.price.token
-        } ($${(+penguin.price.price * +penguin.price.usdPrice).toFixed(2)} USD) by ${
-          penguin.toAddresss.substring(0, 8)
-        } from ${penguin.fromAddress.substring(0,8)} ${penguin.url}`,
+        } by ${penguin.toAddresss.substring(
+          0,
+          8
+        )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`,
       },
       (error: any, data: any) => {
         if (error) {
@@ -26,6 +29,9 @@ export function postTweet(penguin: Penguin): Promise<any> {
         }
         return resolve(data);
       }
+    );
+    console.log(
+      `Penguin ${penguin.id} bought for ${penguin.price.price}${penguin.price.token}`
     );
   });
 }
