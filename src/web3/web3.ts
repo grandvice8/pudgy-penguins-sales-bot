@@ -71,7 +71,6 @@ export async function subscribeToSales() {
     .Transfer({})
     .on('connected', (subscriptionId: any) => {
       console.log('Subscribing to Pudgy Penguins contract');
-      // console.log(subscriptionId);
     })
     .on('data', async (event: any) => {
       console.log('Transfer event');
@@ -81,9 +80,8 @@ export async function subscribeToSales() {
         let tokenSymbol: string;
         let price: number;
         if (response.to === OPENSEA_ADDRESS) {
-          console.log('OS sale');
           if (+response.value != 0) {
-            tokenSymbol = 'eth'
+            tokenSymbol = 'ETH'
             price = +web3.utils.fromWei(response.value);
             tweetSale(event, price, tokenSymbol);
           } else {
@@ -103,23 +101,22 @@ export async function subscribeToSales() {
                 tweetSale(event, price, tokenSymbol);
                 break;
               } else {
-                console.log('Sale but not working');
+                console.log('Broken OpenSea Transfer');
               }
             }
           }
         } else {
-          console.log('Other transfer');
+          console.log('Non OpenSea Transfer');
         }
       });
     })
     .on('changed', (event: any) => {
       // remove event from local database
-      console.log('changed');
+      console.log('changed event');
     })
     .on('error', (error: any, receipt: any) => {
       // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       console.log('error');
       console.log(error);
-      console.log(receipt);
     });
 }

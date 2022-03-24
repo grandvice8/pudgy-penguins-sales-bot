@@ -16,9 +16,9 @@ export function postTweet(penguin: Penguin): Promise<any> {
     T.post(
       'statuses/update',
       {
-        status: `Penguin ${
-          penguin.id
-        } bought for ${penguin.price.price}${penguin.price.token} by ${penguin.toAddresss.substring(
+        status: `Penguin ${penguin.id} bought for ${penguin.price.price}${
+          penguin.price.token
+        } by ${penguin.toAddresss.substring(
           0,
           8
         )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`,
@@ -30,13 +30,8 @@ export function postTweet(penguin: Penguin): Promise<any> {
         return resolve(data);
       }
     );
-    // log
-    console.log(`Penguin ${
-      penguin.id
-    } bought for ${penguin.price.price}${penguin.price.token} by ${penguin.toAddresss.substring(
-      0,
-      8
-    )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`);
-    
+    console.log(
+      `Penguin ${penguin.id} bought for ${penguin.price.price}${penguin.price.token}`
+    );
   });
 }
