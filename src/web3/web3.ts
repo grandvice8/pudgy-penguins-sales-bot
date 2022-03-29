@@ -9,6 +9,7 @@ const ETHERSCAN_ABI_URL = process.env.ETHERSCAN_ENDPOINT || '';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || '';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '';
 const OPENSEA_ADDRESS = process.env.OPENSEA_ADDRESS || '';
+const LOOKS_RARE_ADDRESS = process.env.LOOKS_RARE_ADDRESS || '';
 const WSS_PROVIDER = process.env.WSS_PROVIDER || '';
 const PENGUIN_BASE_URL = 'https://opensea.io/assets/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/';
 const TRANSFER_EVENT_HASH = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -79,7 +80,7 @@ export async function subscribeToSales() {
       web3.eth.getTransaction(event.transactionHash).then(async (response) => {
         let tokenSymbol: string;
         let price: number;
-        if (response.to === OPENSEA_ADDRESS) {
+        if (response.to === OPENSEA_ADDRESS || response.to === LOOKS_RARE_ADDRESS) {
           if (+response.value != 0) {
             tokenSymbol = 'ETH'
             price = +web3.utils.fromWei(response.value);
@@ -101,12 +102,12 @@ export async function subscribeToSales() {
                 tweetSale(event, price, tokenSymbol);
                 break;
               } else {
-                console.log('Broken OpenSea Transfer');
+                console.log('Broken OpenSea or LooksRare Transfer');
               }
             }
           }
         } else {
-          console.log('Non OpenSea Transfer');
+          console.log('Non OpenSea or LooksRare Transfer');
         }
       });
     })
