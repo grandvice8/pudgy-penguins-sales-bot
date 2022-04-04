@@ -1,6 +1,6 @@
 import https from 'https';
 
-export function request(url: string): Promise<string> {
+export function request(url: string): Promise<any> {
   return new Promise((resolve, reject) => {
     https
       .get(url, (resp: any) => {

@@ -18,7 +18,7 @@ export function postTweet(penguin: Penguin): Promise<any> {
       {
         status: `Penguin ${penguin.id} bought for ${penguin.price.price}${
           penguin.price.token
-        } by ${penguin.toAddresss.substring(
+        } (${penguin.price.usdPrice}) by ${penguin.toAddresss.substring(
           0,
           8
         )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`,
@@ -31,7 +31,7 @@ export function postTweet(penguin: Penguin): Promise<any> {
       }
     );
     console.log(
-      `Penguin ${penguin.id} bought for ${penguin.price.price}${penguin.price.token}`
+      `Penguin ${penguin.id} bought for ${penguin.price.price}${penguin.price.token} (${penguin.price.usdPrice})`
     );
   });
 }
