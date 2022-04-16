@@ -3,6 +3,7 @@ import { Penguin } from '../models/penguin';
 import { request } from '../utilities/request';
 import Web3 from 'web3';
 import * as dotenv from 'dotenv';
+import { getCoinGeckoId } from '../utilities/functions';
 dotenv.config();
 
 const ETHERSCAN_ABI_URL = process.env.ETHERSCAN_ENDPOINT || '';
@@ -15,6 +16,19 @@ const PENGUIN_BASE_URL =
   'https://opensea.io/assets/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/';
 const TRANSFER_EVENT_HASH =
   '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
+const options = {
+  // Enable auto reconnection
+  reconnect: {
+    auto: true,
+    delay: 5000, // ms
+    maxAttempts: 5,
+    onTimeout: false,
+  },
+};
+const web3 = new Web3(
+  new Web3.providers.WebsocketProvider(WSS_PROVIDER, options)
+);
 
 async function getContractAbi() {
   const abi = await request(
@@ -31,7 +45,6 @@ async function getTokenInfo(address: string) {
 }
 
 const _getNFTReceiver = (logs: any) => {
-  const web3 = new Web3(new Web3.providers.WebsocketProvider(WSS_PROVIDER));
   for (let log of logs) {
     // ERC-20 Transfer returns the value in `data`, while ERC-721 has the same signature but returns empty data
     if (log.topics[0] === TRANSFER_EVENT_HASH && log.data === '0x') {
@@ -74,33 +87,35 @@ async function getUsdValue(price: number, tokenSymbol: string) {
   return usdPrice * +price;
 }
 
-function getCoinGeckoId(tokenSymbol: string) {
-  switch (tokenSymbol) {
-    case 'ETH':
-      return 'ethereum';
-    case 'DAI':
-      return 'dai';
-    case 'USDC':
-      return 'usd-coin';
-    case 'WETH':
-      return 'weth';
+async function nonEthSale(event: any, receipt: any, nftReceiver: any) {
+  let tokenSymbol: string = '';
+  let price: number = 0;
+
+  for (let log of receipt.logs) {
+    const to = web3.eth.abi
+      .decodeParameter('address', log.topics[1])
+      .toLowerCase();
+    if (
+      log.topics[0] === TRANSFER_EVENT_HASH &&
+      to === event.returnValues.to.toLowerCase() &&
+      log.data !== '0x'
+    ) {
+      const tokenInfo = await getTokenInfo(log.address);
+      tokenSymbol = tokenInfo.result[0].tokenSymbol;
+      price +=
+        +web3.eth.abi.decodeParameter('uint256', log.data) /
+        Math.pow(10, tokenInfo.result[0].tokenDecimal);
+    } else {
+      console.log('Non sale transfer');
+    }
   }
+
+  const usdValue = await getUsdValue(price, tokenSymbol);
+  tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
 }
 
 export async function subscribeToSales() {
   const abi = await getContractAbi();
-  const options = {
-    // Enable auto reconnection
-    reconnect: {
-      auto: true,
-      delay: 5000, // ms
-      maxAttempts: 5,
-      onTimeout: false,
-    },
-  };
-  const web3 = new Web3(
-    new Web3.providers.WebsocketProvider(WSS_PROVIDER, options)
-  );
   const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
   contract.events
     .Transfer({})
@@ -126,28 +141,7 @@ export async function subscribeToSales() {
             const usdValue = await getUsdValue(price, tokenSymbol);
             tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
           } else {
-            for (let log of receipt.logs) {
-              if (
-                // ERC20 sender (1st param of the Transfer event) is the same as the NFT receiver
-                log.topics[0] === TRANSFER_EVENT_HASH &&
-                web3.eth.abi
-                  .decodeParameter('address', log.topics[1])
-                  .toLowerCase() === nftReceiver?.toLowerCase() &&
-                // ERC-20 Transfer returns the value in `data`, while ERC-721 has the same signature but returns empty data
-                log.data !== '0x'
-              ) {
-                const tokenInfo = await getTokenInfo(log.address);
-                tokenSymbol = tokenInfo.result[0].tokenSymbol;
-                price =
-                  +web3.eth.abi.decodeParameter('uint256', log.data) /
-                  Math.pow(10, tokenInfo.result[0].tokenDecimal);
-                const usdValue = await getUsdValue(price, tokenSymbol);
-                tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
-                break;
-              } else {
-                console.log('Broken OpenSea or LooksRare Transfer');
-              }
-            }
+            nonEthSale(event, receipt, nftReceiver);
           }
         } else {
           console.log('Non OpenSea or LooksRare Transfer');
