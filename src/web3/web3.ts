@@ -92,7 +92,9 @@ async function nonEthSale(event: any, receipt: any, nftReceiver: any) {
   let price: number = 0;
 
   for (let log of receipt.logs) {
-    const to = web3.eth.abi.decodeParameter('address', log.topics[1]).toLowerCase();
+    const to = web3.eth.abi
+      .decodeParameter('address', log.topics[1])
+      .toLowerCase();
     if (
       log.topics[0] === TRANSFER_EVENT_HASH &&
       to === event.returnValues.to.toLowerCase() &&
@@ -107,7 +109,7 @@ async function nonEthSale(event: any, receipt: any, nftReceiver: any) {
       console.log('Non sale transfer');
     }
   }
-  
+
   const usdValue = await getUsdValue(price, tokenSymbol);
   tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
 }
