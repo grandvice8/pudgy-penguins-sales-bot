@@ -10,6 +10,7 @@ const ETHERSCAN_ABI_URL = process.env.ETHERSCAN_ENDPOINT || '';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || '';
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '';
 const OPENSEA_ADDRESS = process.env.OPENSEA_ADDRESS || '';
+const SEAPORT_ADDRESS = process.env.SEAPORT_ADDRESS || '';
 const LOOKS_RARE_ADDRESS = process.env.LOOKS_RARE_ADDRESS || '';
 const WSS_PROVIDER = process.env.WSS_PROVIDER || '';
 const PENGUIN_BASE_URL =
@@ -133,6 +134,7 @@ export async function subscribeToSales() {
         let price: number;
         if (
           response.to === OPENSEA_ADDRESS ||
+          response.to === SEAPORT_ADDRESS ||
           response.to === LOOKS_RARE_ADDRESS
         ) {
           if (+response.value != 0) {
