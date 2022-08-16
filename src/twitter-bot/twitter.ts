@@ -35,3 +35,28 @@ export function postTweet(penguin: Penguin): Promise<any> {
     );
   });
 }
+
+export function postSweep(
+  count: number,
+  ethValue: number,
+  sweepUrl: string,
+  usdValue: string
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    T.post(
+      'statuses/update',
+      {
+        status: `${count} Pudgy Penguins are included in a ${ethValue}ETH sweep (${usdValue}) ${sweepUrl}`,
+      },
+      (error: any, data: any) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(data);
+      }
+    );
+    console.log(
+      `${count} Pudgy Penguins swept for ${ethValue}ETH (${usdValue}) ${sweepUrl}`
+    );
+  });
+}

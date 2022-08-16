@@ -1,4 +1,4 @@
-import { postTweet } from '../twitter-bot/twitter';
+import { postSweep, postTweet } from '../twitter-bot/twitter';
 import { Penguin } from '../models/penguin';
 import { request } from '../utilities/request';
 import Web3 from 'web3';
@@ -115,6 +115,24 @@ async function nonEthSale(event: any, receipt: any, nftReceiver: any) {
   tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
 }
 
+function getTokenCount(receipt: any): number {
+  return receipt.logs.reduce((count: number, log: any) => {
+    try {
+      const from = web3.eth.abi
+        .decodeParameter('address', log.topics[2])
+        .toLowerCase();
+      return log.topics[0] === TRANSFER_EVENT_HASH &&
+        log.address === CONTRACT_ADDRESS &&
+        from === receipt.from.toLowerCase() &&
+        log.data === '0x'
+        ? (count += 1)
+        : count;
+    } catch {
+      return count;
+    }
+  }, 0);
+}
+
 export async function subscribeToSales() {
   const abi = await getContractAbi();
   const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
@@ -129,6 +147,7 @@ export async function subscribeToSales() {
         event.transactionHash
       );
       const nftReceiver = _getNFTReceiver(receipt.logs);
+      const tokenCount = getTokenCount(receipt);
       web3.eth.getTransaction(event.transactionHash).then(async (response) => {
         let tokenSymbol: string;
         let price: number;
@@ -141,7 +160,14 @@ export async function subscribeToSales() {
             tokenSymbol = 'ETH';
             price = +web3.utils.fromWei(response.value);
             const usdValue = await getUsdValue(price, tokenSymbol);
-            tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
+            tokenCount > 1
+              ? postSweep(
+                  tokenCount,
+                  price,
+                  `https://etherscan.io/tx/${event.transactionHash}`,
+                  `$${usdValue.toFixed(2)}`
+                )
+              : tweetSale(event, price, tokenSymbol, `$${usdValue.toFixed(2)}`);
           } else {
             nonEthSale(event, receipt, nftReceiver);
           }
