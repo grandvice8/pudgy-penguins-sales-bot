@@ -74,7 +74,7 @@ function tweetSale(
     toAddresss: event.returnValues.to,
     url: url,
   };
-  postTweet(penguin);
+  postTweet(penguin).catch((error) => console.log(error));
 }
 
 async function getUsdValue(price: number, tokenSymbol: string) {
