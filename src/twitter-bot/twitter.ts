@@ -2,7 +2,7 @@ import twit from 'twit';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { Penguin } from '../models/penguin';
+import { Rod } from '../models/rod';
 
 const T = new twit({
   consumer_key: process.env.TWITTER_API_KEY || '',
@@ -11,17 +11,17 @@ const T = new twit({
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-export function postTweet(penguin: Penguin): Promise<any> {
+export function postTweet(rod: Rod): Promise<any> {
   return new Promise((resolve, reject) => {
     T.post(
       'statuses/update',
       {
-        status: `Penguin ${penguin.id} bought for ${penguin.price.price}${
-          penguin.price.token
-        } (${penguin.price.usdPrice}) by ${penguin.toAddresss.substring(
+        status: `Rog ${rod.id} bought for ${rod.price.price}${
+          rod.price.token
+        } (${rod.price.usdPrice}) by ${rod.toAddresss.substring(
           0,
           8
-        )} from ${penguin.fromAddress.substring(0, 8)} ${penguin.url}`,
+        )} from ${rod.fromAddress.substring(0, 8)} ${rod.url}`,
       },
       (error: any, data: any) => {
         if (error) {
@@ -31,7 +31,7 @@ export function postTweet(penguin: Penguin): Promise<any> {
       }
     );
     console.log(
-      `Penguin ${penguin.id} bought for ${penguin.price.price}${penguin.price.token} (${penguin.price.usdPrice})`
+      `Rog ${rod.id} bought for ${rod.price.price}${rod.price.token} (${rod.price.usdPrice})`
     );
   });
 }
@@ -46,7 +46,7 @@ export function postSweep(
     T.post(
       'statuses/update',
       {
-        status: `${count} Pudgy Penguins are included in a ${ethValue}ETH sweep (${usdValue}) ${sweepUrl}`,
+        status: `${count} Pudgy Rods are included in a ${ethValue}ETH sweep (${usdValue}) ${sweepUrl}`,
       },
       (error: any, data: any) => {
         if (error) {
@@ -56,7 +56,7 @@ export function postSweep(
       }
     );
     console.log(
-      `${count} Pudgy Penguins swept for ${ethValue}ETH (${usdValue}) ${sweepUrl}`
+      `${count} Pudgy Rods swept for ${ethValue}ETH (${usdValue}) ${sweepUrl}`
     );
   });
 }

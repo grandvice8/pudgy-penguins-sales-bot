@@ -1,5 +1,5 @@
 import { postSweep, postTweet } from '../twitter-bot/twitter';
-import { Penguin } from '../models/penguin';
+import { Rod } from '../models/rod';
 import { request } from '../utilities/request';
 import Web3 from 'web3';
 import * as dotenv from 'dotenv';
@@ -13,8 +13,8 @@ const OPENSEA_ADDRESS = process.env.OPENSEA_ADDRESS || '';
 const SEAPORT_ADDRESS = process.env.SEAPORT_ADDRESS || '';
 const LOOKS_RARE_ADDRESS = process.env.LOOKS_RARE_ADDRESS || '';
 const WSS_PROVIDER = process.env.WSS_PROVIDER || '';
-const PENGUIN_BASE_URL =
-  'https://opensea.io/assets/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/';
+const RODS_BASE_URL =
+  'https://opensea.io/assets/0x062e691c2054de82f28008a8ccc6d7a1c8ce060d/';
 const TRANSFER_EVENT_HASH =
   '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
@@ -62,8 +62,8 @@ function tweetSale(
   tokenSymbol: string,
   usdValue: string
 ) {
-  const url = `${PENGUIN_BASE_URL}${event.returnValues.tokenId}`;
-  const penguin: Penguin = {
+  const url = `${RODS_BASE_URL}${event.returnValues.tokenId}`;
+  const rod: Rod = {
     id: event.returnValues.tokenId,
     price: {
       price: price,
@@ -74,7 +74,7 @@ function tweetSale(
     toAddresss: event.returnValues.to,
     url: url,
   };
-  postTweet(penguin).catch((error) => console.log(error));
+  postTweet(rod).catch((error) => console.log(error));
 }
 
 async function getUsdValue(price: number, tokenSymbol: string) {
@@ -139,7 +139,7 @@ export async function subscribeToSales() {
   contract.events
     .Transfer({})
     .on('connected', (subscriptionId: any) => {
-      console.log('Subscribing to Pudgy Penguins contract');
+      console.log('Subscribing to Pudgy Rods contract');
     })
     .on('data', async (event: any) => {
       console.log('Transfer event');
